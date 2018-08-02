@@ -16,7 +16,13 @@ import Alamofire
 /// it is setup automatically by the NStack manager, and the translations are accessible by the
 /// global 'tr' variable defined in the auto-generated translations Swift file.
 public class TranslationManager {
-    
+    static let defaultLanguage = Language.init(dictionary: [
+        "locale" : "en-GB",
+        "id" : 11,
+        "name" : "English (UK)",
+        "is_default" : false,
+        "direction" : "LRM"
+    ])
     /// Repository that provides translations.
     let repository: TranslationsRepository
     
@@ -35,8 +41,11 @@ public class TranslationManager {
     /// In memory cache of the translations object.
     var translationsObject: Translatable?
     
+    /// In memory cache of the default language object.
+    public let defaultLanguage: Language
+
     /// In memory cache of the last language object.
-    public fileprivate(set) var currentLanguage: Language?
+    public fileprivate(set) var currentLanguage: Language!
     
     /// Internal handler closure for language change.
     var languageChangedAction: (() -> Void)?
@@ -89,12 +98,13 @@ public class TranslationManager {
                   repository: TranslationsRepository,
                   logger: LoggerType,
                   store: NOPersistentStore = Constants.persistentStore,
-                  fileManager: FileManager = .default) {
+                  fileManager: FileManager = .default,
+                  defaultLanguage: Language = defaultLanguage) {
         self.translationsType = translationsType
         self.repository = repository
         self.store = store
         self.fileManager = fileManager
-        
+        self.defaultLanguage = defaultLanguage
         self.logger = logger
         self.logger.customName = "-Translations"
     }
@@ -262,7 +272,7 @@ public class TranslationManager {
         let dictionary = translationsDictionary
 
         // Set our language
-        currentLanguage = languageOverride ?? processLanguage(dictionary)
+        currentLanguage = languageOverride ?? processLanguage(dictionary) ?? defaultLanguage
 
         // Figure out and set translations
         let parsed = processAllTranslations(dictionary)
@@ -474,7 +484,7 @@ public class TranslationManager {
             logger.logVerbose("Finding translations for language recommended by API: \(currentLanguage.locale).")
             return languageDictionary
         }
-
+     
         logger.logWarning("Falling back to first language in dictionary: \(dictionary.allKeys.first ?? "None")")
         languageDictionary = dictionary.allValues.first as? NSDictionary
         
