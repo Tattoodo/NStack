@@ -30,6 +30,7 @@ public class NStack {
     /// This gets called when the phone language has changed while app is running.
     /// At this point, translations have been updated, if there was an internet connection.
     public var languageChangedHandler: (() -> Void)?
+    public var languageUpdatedHandler: ((_ error: NStackError.Translations?) -> Void)?
 
     /// Description
     public var logLevel: LogLevel = .error {
@@ -206,7 +207,9 @@ public class NStack {
         })
 
         // Update translations if needed
-        translationsManager?.updateTranslations()
+        translationsManager?.updateTranslations({ [weak self] (error) in
+            self?.languageUpdatedHandler?(error)
+        })
     }
 }
 
