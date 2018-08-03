@@ -45,7 +45,7 @@ public class TranslationManager {
     public let defaultLanguage: Language
 
     /// In memory cache of the last language object.
-    public fileprivate(set) var currentLanguage: Language!
+    public fileprivate(set) var currentLanguage: Language?
     
     /// Internal handler closure for language change.
     var languageChangedAction: (() -> Void)?
@@ -199,17 +199,21 @@ public class TranslationManager {
     public var acceptLanguage: String {
         var components: [String] = []
         
+        var languages: [String] = []
         // If we should have language override, then append custom language code
         if let languageOverride = languageOverride {
-            components.append(languageOverride.locale + ";q=1.0")
+            languages.append(languageOverride.locale)
+//            components.append(languageOverride.locale + ";q=1.0")
         }
         
         // Get all languages and calculate lowest quality
-        var languages = repository.fetchPreferredLanguages()
-        
-        // Append fallback language if we don't have any provided
-        if components.count == 0 && languages.count == 0 {
-            languages.append("en")
+//        var languages: [String] = repository.fetchPreferredLanguages()
+        languages.append(contentsOf: repository.fetchPreferredLanguages())
+        // Append default language if we don't have it provided
+        let defaultLanguageString = defaultLanguage.locale.substring(to: 2)
+        if languages.count < 5 &&
+            !(languages.contains(where: { $0.starts(with: defaultLanguageString) })) {
+            languages.append(defaultLanguageString)
         }
         
         let startValue = 1.0 - (0.1 * Double(components.count))

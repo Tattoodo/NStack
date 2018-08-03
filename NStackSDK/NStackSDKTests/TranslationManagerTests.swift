@@ -218,9 +218,13 @@ class TranslationManagerTests: XCTestCase {
     
     func testAcceptLanguage() {
         // Test simple language
+
         repositoryMock.preferredLanguages = ["en"]
         XCTAssertEqual(manager.acceptLanguage, "en;q=1.0")
         
+        repositoryMock.preferredLanguages = ["da-DK"]
+        XCTAssertEqual(manager.acceptLanguage, "da-DK;q=1.0,en;q=0.9")
+
         // Test two languages with locale
         repositoryMock.preferredLanguages = ["da-DK", "en-GB"]
         XCTAssertEqual(manager.acceptLanguage, "da-DK;q=1.0,en-GB;q=0.9")
@@ -231,10 +235,53 @@ class TranslationManagerTests: XCTestCase {
                        "da-DK;q=1.0,en-GB;q=0.9,en;q=0.8,cs-CZ;q=0.7,sk-SK;q=0.6",
                        "There should be maximum 5 accept languages.")
         
+        repositoryMock.preferredLanguages = ["da-DK", "es-US", "es", "cs-CZ"]
+        XCTAssertEqual(manager.acceptLanguage,
+                       "da-DK;q=1.0,es-US;q=0.9,es;q=0.8,cs-CZ;q=0.7,en;q=0.6",
+                       "There should be maximum 5 accept languages.")
+
+        manager.languageOverride = Language(dictionary: [
+            "locale" : "de-DE",
+            "id" : 11,
+            "name" : "Deutsch (DE)",
+            "is_default" : false,
+            "direction" : "LRM"
+            ])
+        repositoryMock.preferredLanguages = ["da-DK", "es-GB", "ru", "cs-CZ", "sk-SK", "no-NO"]
+        XCTAssertEqual(manager.acceptLanguage,
+                       "de-DE;q=1.0,da-DK;q=0.9,es-GB;q=0.8,ru;q=0.7,cs-CZ;q=0.6",
+                       "There should be maximum 5 accept languages.")
+        
         // Test fallback
+        manager.languageOverride = nil
         repositoryMock.preferredLanguages = []
         XCTAssertEqual(manager.acceptLanguage, "en;q=1.0",
                        "If no accept language there should be fallback to english.")
+    }
+    
+    func testAcceptLanguageWithDefaultLanguage() {
+        // Test simple language
+        let defaultLanguage = Language(dictionary: [
+            "locale" : "de-DE",
+            "id" : 11,
+            "name" : "Deutsch (DE)",
+            "is_default" : false,
+            "direction" : "LRM"
+            ])
+        let manager = TranslationManager(translationsType: Translations.self,
+                                     repository: repositoryMock,
+                                     logger: logger,
+                                     store: store,
+                                     fileManager: fileManagerMock,
+                                     defaultLanguage: defaultLanguage)
+        repositoryMock.preferredLanguages = []
+        XCTAssertEqual(manager.acceptLanguage, "de;q=1.0")
+
+        repositoryMock.preferredLanguages = ["de-DE"]
+        XCTAssertEqual(manager.acceptLanguage, "de-DE;q=1.0")
+        
+        repositoryMock.preferredLanguages = ["da-DK"]
+        XCTAssertEqual(manager.acceptLanguage, "da-DK;q=1.0,de;q=0.9")
     }
     
     func testLastAcceptHeader() {
