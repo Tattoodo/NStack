@@ -134,9 +134,11 @@ public class TranslationManager {
     
     /// save method for setting the languageOverride. checks its value before setting it; throws error if language is not supported. Note: use this method instead of languageOverride setter directly
     public func setLanguageOverrideIfSupported(language: Language?) throws {
+        let dictionary = translationsDictionary.value(forKey: "data") as? NSDictionary
         guard language == nil /* automatic */ ||
             (language?.isValid == true &&
-                translationsMatching(language: language!, inDictionary: translationsDictionary) != nil)
+                dictionary != nil &&
+                translationsMatching(language: language!, inDictionary: dictionary!) != nil)
             else { throw NStackError.Translations.languageNotSupported }
         languageOverride = language
     }

@@ -369,7 +369,7 @@ class TranslationManagerTests: XCTestCase {
             "direction" : "LRM"
             ])
         
-        manager.persistedTranslations = mockTranslations.translations
+        manager.persistedTranslations =  ["data" : mockTranslations.translations]
         manager.loadTranslations()
         XCTAssertNotNil(manager.translationsObject,
                         "Translations shouldn't be nil after loading.")
@@ -388,7 +388,7 @@ class TranslationManagerTests: XCTestCase {
             "direction" : "LRM"
             ])
 
-        manager.persistedTranslations = mockTranslations.translations
+        manager.persistedTranslations =  ["data" : mockTranslations.translations!]
         manager.loadTranslations()
         XCTAssertNotNil(manager.translationsObject,
                         "Translations shouldn't be nil after loading.")
@@ -400,7 +400,7 @@ class TranslationManagerTests: XCTestCase {
 
     func testSaveLanguageOverrideAutomatic() {
         
-        manager.persistedTranslations = mockTranslations.translations
+        manager.persistedTranslations =  ["data" : mockTranslations.translations!]
         manager.loadTranslations()
         XCTAssertNotNil(manager.translationsObject,
                         "Translations shouldn't be nil after loading.")
@@ -420,7 +420,7 @@ class TranslationManagerTests: XCTestCase {
             "direction" : "LRM"
             ])
         
-        manager.persistedTranslations = mockTranslations.translations
+        manager.persistedTranslations =  ["data" : mockTranslations.translations!]
         manager.loadTranslations()
         XCTAssertNotNil(manager.translationsObject,
                         "Translations shouldn't be nil after loading.")
