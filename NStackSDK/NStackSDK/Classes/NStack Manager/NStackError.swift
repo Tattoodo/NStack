@@ -13,7 +13,7 @@ public enum NStackError {
         case notConfigured
         case updateFailed(reason: String)
         case parsing(reason: String)
-
+        
         var description: String {
             switch self {
             case .notConfigured: return "NStack needs to be configured before it can be used. Please, call the `start` function first."
@@ -25,10 +25,12 @@ public enum NStackError {
 
     public enum Translations: Error {
         case updateFailed(reason: String)
+        case languageNotSupported
 
         var description: String {
             switch self {
             case .updateFailed(let reason): return reason
+            case .languageNotSupported: return "Language is not supported"
             }
         }
     }

@@ -284,7 +284,7 @@ class TranslationManagerTests: XCTestCase {
         XCTAssertEqual(manager.acceptLanguage, "da-DK;q=1.0,de;q=0.9")
     }
     
-    func testLastAcceptHeader() {
+   func testLastAcceptHeader() {
         XCTAssertNil(manager.lastAcceptHeader, "Last accept header should be nil at start.")
         manager.lastAcceptHeader = "da-DK;q=1.0,en;q=1.0"
         XCTAssertEqual(manager.lastAcceptHeader, "da-DK;q=1.0,en;q=1.0")
@@ -325,7 +325,112 @@ class TranslationManagerTests: XCTestCase {
                         "Translations should load with language override.")
     }
 
-    func testBackendLanguagePriority() {
+    func testLanguageOverrideInvalidLanguage() {
+        // Test simple language
+        let invalidLanguage = Language(dictionary: [
+            "locale" : "",
+            "id" : 11,
+            "name" : "",
+            "is_default" : false,
+            "direction" : "LRM"
+            ])
+        
+        manager.loadTranslations()
+        XCTAssertNotNil(manager.translationsObject,
+                        "Translations shouldn't be nil after loading.")
+        XCTAssertEqual(manager.currentLanguage?.locale, "en-GB")
+        
+
+        manager.languageOverride = Language(dictionary: [
+            "locale" : "de-DE",
+            "id" : 11,
+            "name" : "Deutsch",
+            "is_default" : false,
+            "direction" : "LRM"
+            ])
+        repositoryMock.translationsResponse = mockWrappedTranslations //Danish
+        manager.updateTranslations { _ in
+            XCTAssertEqual(self.manager.currentLanguage?.locale, "de-DE")
+            
+            self.manager.languageOverride = invalidLanguage
+            self.manager.updateTranslations { _ in
+                //fallback to json default language
+                XCTAssertEqual(self.manager.currentLanguage?.locale, "da-DK")
+            }
+        }
+    }
+
+    func testSaveLanguageOverrideInvalidLanguage() {
+        let invalidLanguage = Language(dictionary: [
+            "locale" : "",
+            "id" : 11,
+            "name" : "",
+            "is_default" : false,
+            "direction" : "LRM"
+            ])
+        
+        manager.persistedTranslations = mockTranslations.translations
+        manager.loadTranslations()
+        XCTAssertNotNil(manager.translationsObject,
+                        "Translations shouldn't be nil after loading.")
+        
+        
+        XCTAssertThrowsError(try manager.setLanguageOverrideIfSupported(language: invalidLanguage))
+        XCTAssertNil(manager.languageOverride, "")
+     }
+    
+    func testSaveLanguageOverrideUnsupportedLanguage() {
+        let unsupportedLanguage = Language(dictionary: [
+            "locale" : "de-DE",
+            "id" : 11,
+            "name" : "Deutsch",
+            "is_default" : false,
+            "direction" : "LRM"
+            ])
+
+        manager.persistedTranslations = mockTranslations.translations
+        manager.loadTranslations()
+        XCTAssertNotNil(manager.translationsObject,
+                        "Translations shouldn't be nil after loading.")
+        
+        
+        XCTAssertThrowsError(try manager.setLanguageOverrideIfSupported(language: unsupportedLanguage))
+        XCTAssertNil(manager.languageOverride, "")
+    }
+
+    func testSaveLanguageOverrideAutomatic() {
+        
+        manager.persistedTranslations = mockTranslations.translations
+        manager.loadTranslations()
+        XCTAssertNotNil(manager.translationsObject,
+                        "Translations shouldn't be nil after loading.")
+        
+        
+        XCTAssertNoThrow(try manager.setLanguageOverrideIfSupported(language: nil))
+        XCTAssertNil(manager.languageOverride, "")
+    }
+    
+    func testSaveLanguageOverrideValidLanguage() {
+
+        let validLanguage = Language(dictionary: [
+            "locale" : "en-GB",
+            "id" : 11,
+            "name" : "English",
+            "is_default" : false,
+            "direction" : "LRM"
+            ])
+        
+        manager.persistedTranslations = mockTranslations.translations
+        manager.loadTranslations()
+        XCTAssertNotNil(manager.translationsObject,
+                        "Translations shouldn't be nil after loading.")
+        
+        
+        XCTAssertNoThrow(try manager.setLanguageOverrideIfSupported(language: validLanguage))
+        XCTAssertEqual(manager.languageOverride?.locale, validLanguage.locale, "")
+    }
+    
+   func testBackendLanguagePriority() {
         // We request da-DK as preferred language, which is not a part of the translations we get.
         // The manager then should prioritise falling back to the language that the backend provided.
         // Instead of falling to any type of english or first in the array.

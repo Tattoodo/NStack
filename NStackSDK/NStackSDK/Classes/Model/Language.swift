@@ -36,3 +36,9 @@ extension Language: Serializable {
         return dict
     }
 }
+
+extension Language {
+    var isValid: Bool {
+        return !locale.isEmpty
+    }
+}

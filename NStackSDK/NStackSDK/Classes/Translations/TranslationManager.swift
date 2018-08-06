@@ -71,7 +71,9 @@ public class TranslationManager {
     /// Otherwise, the effect will not be seen.
     public var languageOverride: Language? {
         get {
-            return store.serializableForKey(Constants.CacheKeys.languageOverride)
+            let storedLanguageOverride: Language? = store.serializableForKey(Constants.CacheKeys.languageOverride)
+            guard storedLanguageOverride?.isValid == true else { return nil /*fallback to default if invalid*/ }
+            return storedLanguageOverride
         }
         set {
             if let newValue = newValue {
@@ -129,6 +131,15 @@ public class TranslationManager {
     }
 
     // MARK: - Update & Fetch -
+    
+    /// save method for setting the languageOverride. checks its value before setting it; throws error if language is not supported. Note: use this method instead of languageOverride setter directly
+    public func setLanguageOverrideIfSupported(language: Language?) throws {
+        guard language == nil /* automatic */ ||
+            (language?.isValid == true &&
+                translationsMatching(language: language!, inDictionary: translationsDictionary) != nil)
+            else { throw NStackError.Translations.languageNotSupported }
+        languageOverride = language
+    }
     
     /// Fetches the latest version of the translations. Normally, the translations are aquired
     /// when performing the NStack public call, so in most scenarios, this method won't have to
@@ -489,6 +500,11 @@ public class TranslationManager {
             return languageDictionary
         }
      
+        if let languageDictionary = translationsMatching(locale: defaultLanguage.locale, inDictionary: dictionary) {
+            logger.logVerbose("Finding translations for language recommended by default language: \(defaultLanguage.locale).")
+            return languageDictionary
+        }
+        
         logger.logWarning("Falling back to first language in dictionary: \(dictionary.allKeys.first ?? "None")")
         languageDictionary = dictionary.allValues.first as? NSDictionary
         
