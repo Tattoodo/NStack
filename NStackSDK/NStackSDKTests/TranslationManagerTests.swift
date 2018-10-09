@@ -84,7 +84,8 @@ class TranslationManagerTests: XCTestCase {
                                      repository: repositoryMock,
                                      logger: logger,
                                      store: store,
-                                     fileManager: fileManagerMock)
+                                     fileManager: fileManagerMock,
+                                     defaultLanguage: TranslationManager.defaultLanguage)
     }
 
     override func tearDown() {

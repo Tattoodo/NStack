@@ -507,8 +507,13 @@ public class TranslationManager {
             return languageDictionary
         }
         
-        logger.logWarning("Falling back to first language in dictionary: \(dictionary.allKeys.first ?? "None")")
-        languageDictionary = dictionary.allValues.first as? NSDictionary
+//        logger.logWarning("Falling back to first language in dictionary: \(dictionary.allKeys.first ?? "None")")
+//        languageDictionary = dictionary.allValues.first as? NSDictionary
+        
+        if let languageDictionary = translationsMatching(locale: TranslationManager.defaultLanguage.locale, inDictionary: dictionary){
+            logger.logVerbose("Reverting to defaultLanguage of the class")
+            return languageDictionary
+        }
         
         if let languageDictionary = languageDictionary {
             return languageDictionary
