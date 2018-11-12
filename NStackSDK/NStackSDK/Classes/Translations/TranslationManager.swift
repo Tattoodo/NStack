@@ -495,12 +495,13 @@ public class TranslationManager {
             }
         }
         
+        //BUG?: Suspecting that when the backend is overloaded, it gives wrong locales back
         // Take preferred language from backend
-        if let currentLanguage = currentLanguage,
-            let languageDictionary = translationsMatching(locale: currentLanguage.locale, inDictionary: dictionary) {
-            logger.logVerbose("Finding translations for language recommended by API: \(currentLanguage.locale).")
-            return languageDictionary
-        }
+//        if let currentLanguage = currentLanguage,
+//            let languageDictionary = translationsMatching(locale: currentLanguage.locale, inDictionary: dictionary) {
+//            logger.logVerbose("Finding translations for language recommended by API: \(currentLanguage.locale).")
+//            return languageDictionary
+//        }
      
         if let languageDictionary = translationsMatching(locale: defaultLanguage.locale, inDictionary: dictionary) {
             logger.logVerbose("Finding translations for language recommended by default language: \(defaultLanguage.locale).")
