@@ -472,23 +472,23 @@ public class TranslationManager {
         }
 
         let languages = repository.fetchPreferredLanguages()
-        logger.logVerbose("Finding language for matching preferred languages: \(languages).")
-        
-        // Find matching language and region
-        for lan in languages {
-            // Try matching on both language and region
-            if let dictionary = dictionary.value(forKey: lan) as? NSDictionary {
-                logger.logVerbose("Found matching language for language with region: " + lan)
-                return dictionary
-            }
-        }
+//        logger.logVerbose("Finding language for matching preferred languages: \(languages).")
+//
+//        // Find matching language and region
+//        for lan in languages {
+//            // Try matching on both language and region
+//            if let dictionary = dictionary.value(forKey: lan) as? NSDictionary {
+//                logger.logVerbose("Found matching language for language with region: " + lan)
+//                return dictionary
+//            }
+//        }
         
         let shortLanguages = languages.map({ $0.substring(to: 2) })
         logger.logVerbose("Finding language for matching preferred  short languages: \(languages).")
         
-        // Find matching language only
-        for lanShort in shortLanguages {
-            // Match just on language
+
+        // Match just on language
+        if let lanShort = shortLanguages.first{
             if let dictinoary = translationsMatching(locale: lanShort, inDictionary: dictionary) {
                 logger.logVerbose("Found matching language for short language code: " + lanShort)
                 return dictinoary
